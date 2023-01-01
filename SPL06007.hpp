@@ -3,7 +3,9 @@
 #ifndef __SPL06_007_HPP__
 #define __SPL06_007_HPP__
 
-class SPL06_007{
+#include "I2CUtils/I2C_Device.hpp"
+
+class SPL06_007 : I2CDevice {
 public:
 
     typedef struct{
@@ -63,7 +65,7 @@ private:
  
     constexpr static uint8_t _n_coefs = 18;
 
-    constexpr static uint8_t _def_base_address = 0x77;
+    constexpr static uint8_t _def_i2c_address = 0x77;
 
     constexpr static inline uint32_t _sampling_scale_factors[] = {
         524288u,
@@ -76,21 +78,12 @@ private:
         2088960
     };
 
-    const uint8_t _i2c_address;
-
     //spl06_007_calibration_coeffs _calib_coeffs;
     uint8_t _prod_id;
     uint8_t _rev_id;
     uint8_t _psr_cfg;
     uint8_t _tmp_cfg{ 0x80 }; //init with MSB set to 1 to use external temp sensor as noted in datasheet
     uint8_t _meas_cfg;
-
-    void write_register(uint8_t addr, uint8_t val){
-        Wire.beginTransmission(_i2c_address);
-        Wire.write(addr);
-        Wire.write(val);
-        Wire.endTransmission();
-    }
 
     void update_meas_cfg(){
         uint8_t val = read8(_meas_cfg_reg);
@@ -131,10 +124,10 @@ public:
         MODE_ALL_BACKGR =   0b111
     };
 
-    SPL06_007(uint8_t i2c_address) : _i2c_address(i2c_address){
+    SPL06_007(uint8_t i2c_address) : I2CDevice(i2c_address){
     };
 
-    SPL06_007() : SPL06_007(_def_base_address){};
+    SPL06_007() : SPL06_007(_def_i2c_address){};
 
     void begin(){
         Wire.begin();
@@ -149,6 +142,7 @@ public:
     }
 
     uint8_t read8(uint8_t addr){
+        //used for testing
         uint8_t val = 0x00;
         Wire.beginTransmission(_i2c_address);
         Wire.write(addr);
@@ -159,6 +153,7 @@ public:
     }
 
     uint16_t read16(uint8_t addr){
+        //used for testing
         uint16_t val;
         Wire.beginTransmission(_i2c_address);
         Wire.write(addr);
